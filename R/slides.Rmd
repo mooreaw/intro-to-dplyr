@@ -1,0 +1,216 @@
+---
+title: Intro to the Tidyverse
+author: Andrew Moore
+date: '`r Sys.Date()`'
+output:
+  ioslides_presentation:
+    widescreen: yes
+---
+
+## Hello!
+
+### Currently:
+
+  - Research Analyst with Office of Institutional Research
+
+### Previously:
+
+  - studied Psychology 
+  - worked at University of Michigan, UM-SSW, UM ISR, UM Psychology
+
+## General Outline
+
+### What this talk is
+
+- Crash Course in R & the *tidyverse*, with an emphasis on `{dplyr}`
+
+### What this talk isn't
+
+- Enough to make you fluent in all things R
+
+### Part 1
+
+- Verbs for working with data in a tidy fashion
+- data: Palmer Penguins
+
+### Part 2
+
+- Summarizing & merging data
+- data: Aggregated personality data from US States [(Rentfrow et al. (2013))](https://www.apa.org/pubs/journals/releases/psp-a0034434.pdf)
+
+## Getting R & RStudio
+
+<!-- more to do more to do here definitely more -->
+
+- Installing R
+  - r-project.org
+  - You can download the executable for installing R from one of the mirrors, such as Microsoft's
+  - https://cran.microsoft.com/
+
+- If you want to try out R, please, please, please use RStudio!
+  - RStudio is an IDE (a specialized text editor) that makes working with R (and other commonly used languages for working with data) much easier
+  - https://rstudio.com/products/rstudio/download/
+
+# Part 1 | Meet {dplyr} & the {tidyverse}
+
+## Our First Commands: Loading Libraries & Data
+
+- Only run once: `install.package("tidyverse")`!
+- When ready to use: `library(tidyverse)`
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(palmerpenguins)
+
+glimpse(penguins)
+```
+
+<div class="notes">
+- Penguins data is loaded automatically from the package, but we'll cover importing basic data in part 2.
+
+- Our first dplyr function: glimpse()
+  - we can see the dimensions of our dataset
+  - column names & data types
+  - preview of what the contents of each column looks like
+  
+- Many functions in the tidyverse have expressive & hopefully memorable names that get across what they're for
+</div>
+
+## Using `filter()` to Subset Datasets
+
+```{r, eval = FALSE}
+# only Adelie penguins
+filter(penguins, species == "Adelie")
+
+# Adelie *OR* Gentoo
+filter(penguins, species == "Adelie" | species == "Gentoo")
+
+# this gets us the same result as above
+filter(penguins, species %in% c("Adelie", "Gentoo"))
+
+# multiple conditions can be added using commas
+filter(penguins, bill_length_mm >= 45.8, year == 2007)
+```
+
+- Operators for establishing logical conditions:
+  - Equal/Not equal to: `!=`, `==`
+  - Greater than/less than: `>` & `<`, `>=` & `<=`
+  - And/Or: `&`, `|`
+  - In: `%in%`
+
+<div class = "notes">
+When our condition is based on a string, you need to wrap the entry in quotation marks
+</div>
+
+## Interlude: the Pipe Operator `%>%`
+
+- You can read the pipe operator as "and then" in your code
+
+- For example, a morning commute: "get in car AND THEN turn key AND THEN open garage AND THEN drive to work" using the pipe, looks like:
+
+```
+get in car %>%
+    turn key %>%
+    open garage %>%
+    drive to work
+```
+
+```{r, eval = FALSE}
+# this command...
+filter(penguins, species == "Adelie")
+
+# is the same as this!
+penguins %>%
+  filter(species == "Adelie")
+```
+
+# Part 2: Merging Data
+
+## Importing Data
+
+```{r}
+library(tidyverse)
+
+bf <- read_csv("../data/rentfrow-2013-bf-states-clean.csv")
+```
+
+## Importing Data (contd.)
+
+```{r}
+# built in lists of states & abbreviations
+states <- tibble(state = state.name, state_abb = state.abb, region = as.character(state.region))
+
+# who are we missing?
+anti_join(states, bf, by = "state")
+```
+
+```{r}
+# well, we won't get to learn anything about Hawaii or Alaska, bummer!
+# let's add the state 'regions' onto our data
+bf <- left_join(bf, states, by = "state")
+
+# how do the regions compare as far as 'agreeableness'?
+bf %>%
+  group_by(region) %>%
+  summarise(a_m  = weighted.mean(t_a, w = sample_size))
+
+# hold on... why do we have missing data?
+# let's find out which one isn't lining up...
+filter(bf, is.na(region))
+
+# we can fix this!
+bf <- bf %>%
+  mutate(
+    state_abb = ifelse(state == "District of Columbia", "DC", state_abb),
+    region    = ifelse(state == "District of Columbia", "Northeast", region)
+  )
+
+# now let's run our code again
+bf %>%
+  group_by(region) %>%
+  summarise(
+    a_m  = mean(t_a),
+    a_sd = sd(t_a)
+  )
+
+# what if I wanted to know about the 'midwest'?
+View(states)
+
+# or:
+arrange(states, region) %>% print(n = 20)
+
+# let's use mutate() again, to create a new variable
+# https://fivethirtyeight.com/features/what-states-are-in-the-midwest/
+bf <- bf %>%
+  mutate(
+    region = ifelse(state_abb %in% c("IL", "MI", "IN", "OH", "IA"), "Midwest", region)
+  )
+
+# how many participants from each area?
+bf %>%
+  group_by(region) %>%
+  summarise(
+    total_sample = sum(sample_size),
+    a_m          = mean(t_a),
+    a_sd         = sd(t_a)
+  )
+
+bf %>%
+  group_by(region) %>%
+  summarise(
+    total_sample = sum(sample_size),
+    a_m          = mean(t_a),
+    a_sd         = sd(t_a)
+  ) %>%
+  arrange(a_m)
+
+# which 5 states are the least agreeable?
+bf %>%
+  arrange(t_a) %>%
+  slice(1:5)
+
+# what about *most* agreeable?
+bf %>%
+  arrange(desc(t_a)) %>%
+  slice(1:5)
+```
