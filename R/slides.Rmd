@@ -5,11 +5,11 @@ date: '`r Sys.Date()`'
 output:
   ioslides_presentation:
     widescreen: yes
-    logo: ../img/apple-touch-icon-180x180.png
 ---
 
 ```{r include = FALSE}
 options(tibble.print_min = 3)
+set.seed(1)
 ```
 
 ## Hello! {.build}
@@ -21,7 +21,7 @@ options(tibble.print_min = 3)
 ### Previously:
 
   - B.A., Psychology 
-  - worked at University of Michigan, Ann Arbor (UM-SSW, UM ISR, UM Psychology)
+  - University of Michigan, Ann Arbor (UM-SSW, UM-ISR, UM Psychology)
 
 ## General Outline (1/2)
 
