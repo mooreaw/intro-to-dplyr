@@ -5,6 +5,7 @@ date: '`r Sys.Date()`'
 output:
   ioslides_presentation:
     widescreen: yes
+    logo: ../img/apple-touch-icon-180x180.png
 ---
 
 ```{r include = FALSE}
@@ -353,3 +354,40 @@ library(nycflights13)
 
 glimpse(flights)
 ```
+
+```{css, echo = FALSE}
+.end {
+  color: white;
+}
+```
+
+# Wrap-up
+
+## {.end data-background=../img/landing-timelapse.jpg}
+
+<center>
+<br>
+<br>
+**Thank you!**
+<br>
+<br>
+<br>
+<div class="white">
+light on data visualization, but hopefully useful
+<br>
+<br>
+<br>
+<br>
+"80% of work an analyst does is cleaning/wrangling data"
+<br>
+<br>
+<br>
+<br>
+questions?
+<br>
+<br>
+<br>
+<font size="2">Photo via [Flickr](https://www.flickr.com/photos/30052849@N07/16430720407)</font>
+</div>
+</center>
+
