@@ -69,10 +69,8 @@ Photo by David Ryder / Getty
 
 ## Getting R & RStudio
 
-<!-- more to do more to do here definitely more -->
-
 - Installing R
-  - r-project.org
+  - https://r-project.org/
   - You can download the executable for installing R from one of the mirrors, such as Microsoft's
   - https://cran.microsoft.com/
 
@@ -344,35 +342,111 @@ penguins %>%
 <center>
 ![](../img/relational-nycflights.png){height=90%}
 <br>
-From Chapter 13 of "R for Data Science" by Wickham & Grolemund
 </center>
 
-## blah
+<font size="2">From Chapter 13 of "R for Data Science" by Wickham & Grolemund</font>
+
+## Does the age of a plane lead to more delays?
 
 ```{r}
 library(nycflights13)
 
-glimpse(flights)
+flights %>% select(tailnum, year, month, day, dep_delay) %>% slice(1:3)
+
+planes %>% select(tailnum, year, type, manufacturer) %>% slice(1:3)
 ```
 
-```{css, echo = FALSE}
-.end {
-  color: white;
-}
+## Outer Joins
+
+```{r echo = FALSE, out.height="20%", fig.align="center"}
+knitr::include_graphics("../img/join-outer.png")
 ```
+<font size="2">Image from "R 4 Data Science"</font>
+
+## Back to R: `left_join()` {.build}
+
+There are `r nrow(flights)` flights recorded in the data, but only `r nrow(planes)` planes.
+
+```{r}
+with_planes <- flights %>%
+  select(tailnum, flight_year = year, dep_delay) %>%
+  left_join(planes, by = "tailnum")
+
+with_planes
+```
+
+## Answering our question (1/2)
+
+```{r}
+with_planes <- with_planes %>% mutate(service_years = flight_year - year)
+
+count(with_planes, service_years)
+```
+
+## Answering our question (2/3)
+
+```{r}
+with_planes %>%
+  mutate(service_qtile = ntile(service_years, 4)) %>%
+  group_by(service_qtile) %>%
+  summarise(avg_delay = mean(dep_delay))
+```
+
+## Answering our question (3/3)
+
+```{r}
+with_planes %>%
+  mutate(service_qtile = ntile(service_years, 4)) %>%
+  group_by(service_qtile) %>%
+  ### <b>
+  summarise(avg_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ### </b>
+  arrange(desc(avg_delay))
+```
+
+## "Filtering" Joins
+
+`semi_join()`
+
+```{r echo = FALSE, out.height="20%", fig.align="center"}
+knitr::include_graphics("../img/join-semi.png")
+```
+
+`anti_join()`
+
+```{r echo = FALSE, out.height="20%", fig.align="center"}
+knitr::include_graphics("../img/join-anti.png")
+```
+
+<font size="2">Images from "R 4 Data Science"</font>
 
 # Wrap-up
 
-## {.end data-background=../img/landing-timelapse.jpg}
+## Additional Resources
+
+
+- R Cheatsheets
+  - [Base R](https://github.com/rstudio/cheatsheets/blob/master/base-r.pdf)
+  - [dplyr](https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf)
+      - needs minor updates for changes in 2020, but still good :)
+  - Many others on [RStudio's website](https://rstudio.com/resources/cheatsheets/)
+
+<br>
+
+- ["R 4 Data Science"](https://r4ds.had.co.nz/)
+  - My favorite resource
+  - It's a great book, fully available online, and FREE!
+
+## {data-background=../img/landing-timelapse.jpg}
 
 <center>
 <br>
 <br>
+<div class="white">
 **Thank you!**
 <br>
 <br>
 <br>
-<div class="white">
 light on data visualization, but hopefully useful
 <br>
 <br>
