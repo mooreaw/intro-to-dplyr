@@ -8,6 +8,7 @@ output:
 ---
 
 ```{r include = FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(tibble.print_min = 3)
 set.seed(1)
 ```
@@ -78,7 +79,7 @@ Photo by David Ryder / Getty
   - RStudio is an IDE (a specialized text editor) that makes working with R (and other commonly used languages for working with data) much easier
   - https://rstudio.com/products/rstudio/download/
 
-# Part 1 | Meet {dplyr} & the {tidyverse}
+# Part 1 | Meet {dplyr}
 
 ## `{dplyr}` {.build}
 
@@ -335,7 +336,7 @@ penguins %>%
   )
 ```
 
-# Part 2: Merging Data
+# Part 2 | Two-table Verbs
 
 ## The `{nycflights13}` dataset
 
@@ -365,7 +366,7 @@ knitr::include_graphics("../img/join-outer.png")
 
 ## Back to R: `left_join()` {.build}
 
-There are `r nrow(flights)` flights recorded in the data, but only `r nrow(planes)` planes.
+There are `r scales::comma(nrow(flights))` flights recorded in the data, but only `r scales::comma(nrow(planes))` planes.
 
 ```{r}
 with_planes <- flights %>%
@@ -420,10 +421,49 @@ knitr::include_graphics("../img/join-anti.png")
 
 <font size="2">Images from "R 4 Data Science"</font>
 
+## Avg. delay for the 5 most common destinations
+
+```{r}
+top_destinations <- flights %>% count(dest) %>% arrange(desc(n)) %>% slice(1:5)
+
+# hmm... means & medians are really different!
+flights %>%
+  ### <b>
+  semi_join(top_destinations, by = "dest") %>%
+  ### </b>
+  group_by(dest) %>%
+  summarise(avg_delay = mean(dep_delay, na.rm = TRUE), med_delay = median(dep_delay, na.rm = TRUE))
+```
+
+## What if we drop super-delayed flights?
+
+```{r}
+gte_2_hr <- filter(flights, dep_delay >= 120)
+
+flights %>%
+  semi_join(top_destinations, by = "dest") %>%
+  ### <b>
+  anti_join(gte_2_hr, by = c("tailnum", "flight", "year", "month", "day")) %>%
+  ### </b>
+  group_by(dest) %>%
+  summarise(avg_delay = mean(dep_delay, na.rm = TRUE), med_delay = median(dep_delay, na.rm = TRUE))
+```
+
+## Probably out of time!
+
+- Things we didn't cover:
+  - `inner_join()`
+  - `full_join()`
+  - `right_join()`
+  - Set Operations
+      - `union()`, `setdiff()`, `intersect()`
+  - Concatenation
+      - `bind_cols()`
+      - `bind_rows()`
+
 # Wrap-up
 
 ## Additional Resources
-
 
 - R Cheatsheets
   - [Base R](https://github.com/rstudio/cheatsheets/blob/master/base-r.pdf)
