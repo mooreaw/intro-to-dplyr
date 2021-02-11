@@ -7,7 +7,11 @@ output:
     widescreen: yes
 ---
 
-## Hello!
+```{r include = FALSE}
+options(tibble.print_min = 3)
+```
+
+## Hello! {.build}
 
 ### Currently:
 
@@ -18,25 +22,49 @@ output:
   - studied Psychology 
   - worked at University of Michigan, UM-SSW, UM ISR, UM Psychology
 
-## General Outline
+## General Outline (1/2)
 
-### What this talk is
+<center>
+Single-table verbs using the [Palmer Penguins](https://allisonhorst.github.io/palmerpenguins/) dataset
+
+![](../img/penguins.png){width=50%}
+<br>
+Artwork by <a href="https://twitter.com/allison_horst">@allison_horst</a>
+</center>
+
+<div class = "notes">
+What this talk is
 
 - Crash Course in R & the *tidyverse*, with an emphasis on `{dplyr}`
 
-### What this talk isn't
+What this talk isn't
 
-- Enough to make you fluent in all things R
+- Not enough to make you fluent (sorry!)
 
-### Part 1
+Part 1
 
-- Verbs for working with data in a tidy fashion
-- data: Palmer Penguins
+- Single-table verbs for working with data in a tidy fashion
+- data: [Palmer Penguins](https://allisonhorst.github.io/palmerpenguins/)
 
-### Part 2
+Part 2
 
-- Summarizing & merging data
+- Two-table verbs; merging and summarizing data
 - data: Aggregated personality data from US States [(Rentfrow et al. (2013))](https://www.apa.org/pubs/journals/releases/psp-a0034434.pdf)
+</div>
+
+## General Outline (2/2)
+
+<center>
+Two-table verbs, using the [{`nycflights13`} dataset](https://github.com/hadley/nycflights13)
+
+```{r echo = FALSE, out.width="65%", fig.align='center'}
+# photo from here: https://www.newyorker.com/news/our-columnists/how-boeing-and-the-faa-created-the-737-max-catastrophe
+knitr::include_graphics("../img/ryder-getty-Cassidy-BoeingFAA.jpg")
+```
+<br>
+Photo by David Ryder / Getty
+
+</center>
 
 ## Getting R & RStudio
 
@@ -52,6 +80,56 @@ output:
   - https://rstudio.com/products/rstudio/download/
 
 # Part 1 | Meet {dplyr} & the {tidyverse}
+
+## `{dplyr}` {.build}
+
+**Goals when working with data**
+
+1. Figure out what you want
+2. Describe the steps as code
+3. Run the code
+
+- `{dplyr}` uses expressive "verbs" that correspond to common tasks
+- Encourages thinking about data manipulation challenges in a consistent way
+
+## `{dplyr}`'s "verbs"
+
+- *Rows*
+  - `filter()` chooses rows based on values in columns
+  - `slice()` chooses rows based on location
+  - `arrange()` changes the order of rows
+- *Columns*
+  - `select()` changes whether or not a column is included
+  - `rename()` changes the names of columns
+  - `mutate()` adds new columns to the data, or alters existing columns
+- *Groups of Rows*
+  - `group_by()` creates a *grouped* data frame
+  - `summarize()` uses a summary function to collapse a group into a 1 row
+
+## Interlude: the Pipe Operator `%>%` {.build}
+
+```{r, eval = FALSE}
+drink(pour(brew(fill_tin(grind_coffee(who = me, beans = "DT House-Blend")), mins = 5)))
+```
+
+- nested, have to work from the inside out to understand the result
+
+```{r, eval = FALSE}
+me %>%
+  grind_coffee(beans = "DT House-Blend") %>%
+  fill_tin() %>%
+  brew(mins = 5) %>%
+  pour() %>%
+  drink()
+```
+
+- `%>%` allows you to write code sequentially
+- `f(x, y)` is equivalent to `x %>% f(y)`
+- You can read the pipe operator as "and then" in your code
+
+<div class = "notes">
+- doing commands one at a time is fine, but I'll be using the pipe throughout the remainder of the pres
+</div>
 
 ## Our First Commands: Loading Libraries & Data
 
@@ -76,7 +154,7 @@ glimpse(penguins)
 - Many functions in the tidyverse have expressive & hopefully memorable names that get across what they're for
 </div>
 
-## Using `filter()` to Subset Datasets
+## Subsetting data with `filter()` {.build}
 
 ```{r, eval = FALSE}
 # only Adelie penguins
@@ -102,115 +180,176 @@ filter(penguins, bill_length_mm >= 45.8, year == 2007)
 When our condition is based on a string, you need to wrap the entry in quotation marks
 </div>
 
-## Interlude: the Pipe Operator `%>%`
+## Pulling out rows by position with `slice()`
 
-- You can read the pipe operator as "and then" in your code
+```{r}
+slice(penguins, 1:3)
 
-- For example, a morning commute: "get in car AND THEN turn key AND THEN open garage AND THEN drive to work" using the pipe, looks like:
-
-```
-get in car %>%
-    turn key %>%
-    open garage %>%
-    drive to work
+slice(penguins, c(1, 33, 2))
 ```
 
-```{r, eval = FALSE}
-# this command...
-filter(penguins, species == "Adelie")
+## `slice()` contd. {.build}
 
-# is the same as this!
+```{r}
+slice_min(penguins, bill_length_mm, n = 3)
+
+slice_sample(penguins, n = 3)
+```
+
+
+## Picking out columns of interest using `select()` {.build}
+
+```{r}
+penguins
+
+penguins %>% select(species, island, body_mass_g)
+```
+
+## `select()` contd. {.build}
+
+```{r}
+penguins %>% select(species, island, mass_grams = body_mass_g)
+```
+
+## `select()` helpers: `ends_with()` & friends (1/2) {.build}
+
+```{r}
+penguins %>% select(species, ends_with("_mm")) %>% slice(1:3)
+
+penguins %>% select(species, contains("length")) %>% slice(1:3)
+```
+
+## `select()` helpers: `ends_with()` & friends (2/2) {.build}
+
+```{r}
+penguins %>% select(species, body_mass_g:year) %>% slice(1:3)
+
+penguins %>% select(-species, -(body_mass_g:year)) %>% slice(1:3)
+```
+
+## `rename()`: hopefully self-explanatory :)
+
+```{r}
+# new names go to the left of the '=', old names on the right
+# separate arguments by commas! (note: alignment doesn't matter, but looks cleaner)
 penguins %>%
-  filter(species == "Adelie")
+  rename(
+    isle_name   = island,
+    bill_len    = bill_length_mm,
+    bill_depth  = bill_depth_mm,
+    flipper_len = flipper_length_mm,
+    mass_grams  = body_mass_g
+  )
+```
+
+## Sorting rows with `arrange()` {.build}
+
+```{r}
+penguins %>% select(island, species, bill_length_mm) %>% arrange(island, bill_length_mm)
+
+penguins %>% select(island, species, bill_length_mm) %>% arrange(desc(bill_length_mm))
+```
+
+## Adding and updating columns with `mutate()` {.build}
+
+```{r}
+# all together now! chaining the verbs together...
+penguins %>%
+  filter(year == 2007) %>%
+  arrange(desc(island)) %>%
+  select(species, island, bill_length_mm) %>%
+  ### <b>
+  mutate(bill_len_sqrt = sqrt(bill_length_mm)) %>%
+  ### </b>
+  slice(1:7)
+```
+
+## `mutate()` contd. {.build}
+
+```{r}
+# maybe the log of bill length times depth is important? ¯\_(ツ)_/¯
+penguins %>%
+  mutate(
+    bill_ld     = bill_length_mm * bill_depth_mm,
+    ### <b>
+    bill_ld_log = log(bill_ld)
+    ### </b>
+  ) %>%
+  select(species, starts_with("bill"))
+```
+
+## Counting & summarizing: `count()` {.build}
+
+<div class="columns-2">
+```{r}
+count(penguins, island, species)
+```
+
+<br>
+<br>
+<br>
+
+```{r}
+penguins %>%
+  filter(year == 2007 | year == 2008) %>%
+  count(island, species)
+```
+
+</div>
+
+## Counting & summarizing: `group_by()` {.build}
+
+<div class = "columns-2">
+
+```{r}
+penguins %>%
+  group_by(island) %>%
+  filter(
+    year == 2007 | year == 2008,
+    n() > 100
+  ) %>%
+  count(island, species)
+```
+
+```{r}
+penguins %>%
+  filter(year == 2007 | year == 2008) %>%
+  group_by(island) %>%
+  ### <b>
+  filter(n() > 100) %>%
+  ### </b>
+  count(island, species)
+```
+
+</div>
+
+## Counting & summarizing: `summarize()` {.build}
+
+```{r, message = FALSE}
+penguins %>%
+  group_by(species, island) %>%
+  summarize(
+    n_penguins   = n(),
+    avg_bill_len = mean(bill_length_mm, na.rm = TRUE),   # tell R to ignore missing data
+    med_bill_len = median(bill_length_mm, na.rm = TRUE),
+    sd_bill_len  = sd(bill_length_mm, na.rm = TRUE)
+  )
 ```
 
 # Part 2: Merging Data
 
-## Importing Data
+## The `{nycflights13}` dataset
+
+<center>
+![](../img/relational-nycflights.png){height=90%}
+<br>
+From Chapter 13 of "R for Data Science" by Wickham & Grolemund
+</center>
+
+## blah
 
 ```{r}
-library(tidyverse)
+library(nycflights13)
 
-bf <- read_csv("../data/rentfrow-2013-bf-states-clean.csv")
-```
-
-## Importing Data (contd.)
-
-```{r}
-# built in lists of states & abbreviations
-states <- tibble(state = state.name, state_abb = state.abb, region = as.character(state.region))
-
-# who are we missing?
-anti_join(states, bf, by = "state")
-```
-
-```{r}
-# well, we won't get to learn anything about Hawaii or Alaska, bummer!
-# let's add the state 'regions' onto our data
-bf <- left_join(bf, states, by = "state")
-
-# how do the regions compare as far as 'agreeableness'?
-bf %>%
-  group_by(region) %>%
-  summarise(a_m  = weighted.mean(t_a, w = sample_size))
-
-# hold on... why do we have missing data?
-# let's find out which one isn't lining up...
-filter(bf, is.na(region))
-
-# we can fix this!
-bf <- bf %>%
-  mutate(
-    state_abb = ifelse(state == "District of Columbia", "DC", state_abb),
-    region    = ifelse(state == "District of Columbia", "Northeast", region)
-  )
-
-# now let's run our code again
-bf %>%
-  group_by(region) %>%
-  summarise(
-    a_m  = mean(t_a),
-    a_sd = sd(t_a)
-  )
-
-# what if I wanted to know about the 'midwest'?
-View(states)
-
-# or:
-arrange(states, region) %>% print(n = 20)
-
-# let's use mutate() again, to create a new variable
-# https://fivethirtyeight.com/features/what-states-are-in-the-midwest/
-bf <- bf %>%
-  mutate(
-    region = ifelse(state_abb %in% c("IL", "MI", "IN", "OH", "IA"), "Midwest", region)
-  )
-
-# how many participants from each area?
-bf %>%
-  group_by(region) %>%
-  summarise(
-    total_sample = sum(sample_size),
-    a_m          = mean(t_a),
-    a_sd         = sd(t_a)
-  )
-
-bf %>%
-  group_by(region) %>%
-  summarise(
-    total_sample = sum(sample_size),
-    a_m          = mean(t_a),
-    a_sd         = sd(t_a)
-  ) %>%
-  arrange(a_m)
-
-# which 5 states are the least agreeable?
-bf %>%
-  arrange(t_a) %>%
-  slice(1:5)
-
-# what about *most* agreeable?
-bf %>%
-  arrange(desc(t_a)) %>%
-  slice(1:5)
+glimpse(flights)
 ```
