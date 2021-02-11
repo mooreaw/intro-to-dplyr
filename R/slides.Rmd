@@ -1,5 +1,5 @@
 ---
-title: Intro to the Tidyverse
+title: Intro to `dplyr`
 author: Andrew Moore
 date: '`r Sys.Date()`'
 output:
@@ -19,8 +19,8 @@ options(tibble.print_min = 3)
 
 ### Previously:
 
-  - studied Psychology 
-  - worked at University of Michigan, UM-SSW, UM ISR, UM Psychology
+  - B.A., Psychology 
+  - worked at University of Michigan, Ann Arbor (UM-SSW, UM ISR, UM Psychology)
 
 ## General Outline (1/2)
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Intro to the Tidyverse</title>
+  <title>Intro to dplyr</title>
 
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -20,7 +20,7 @@
     var SLIDE_CONFIG = {
       // Slide settings
       settings: {
-                title: 'Intro to the Tidyverse',
+                title: 'Intro to <code>dplyr</code>',
                         useBuilds: true,
         usePrettify: true,
         enableSlideAreas: true,
@@ -3136,8 +3136,8 @@ slide:not(.current) .plotly.html-widget{
 <h3>Previously:</h3>
 
 <ul>
-<li>studied Psychology</li>
-<li>worked at University of Michigan, UM-SSW, UM ISR, UM Psychology</li>
+<li>B.A., Psychology</li>
+<li>worked at University of Michigan, Ann Arbor (UM-SSW, UM ISR, UM Psychology)</li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>General Outline (1/2)</h2></hgroup><article  id="general-outline-12">
@@ -3374,9 +3374,9 @@ filter(penguins, bill_length_mm &gt;= 45.8, year == 2007)</pre>
 <pre >## # A tibble: 3 x 8
 ##   species island bill_length_mm bill_depth_mm flipper_length_… body_mass_g sex  
 ##   &lt;fct&gt;   &lt;fct&gt;           &lt;dbl&gt;         &lt;dbl&gt;            &lt;int&gt;       &lt;int&gt; &lt;fct&gt;
-## 1 Adelie  Biscoe           35            17.9              190        3450 fema…
-## 2 Adelie  Biscoe           35.5          16.2              195        3350 fema…
-## 3 Adelie  Dream            41.5          18.5              201        4000 male 
+## 1 Chinst… Dream            45.6          19.4              194        3525 fema…
+## 2 Gentoo  Biscoe           50            15.3              220        5550 male 
+## 3 Gentoo  Biscoe           47.3          13.8              216        4725 &lt;NA&gt; 
 ## # … with 1 more variable: year &lt;int&gt;</pre>
 
 </article></slide><slide class=""><hgroup><h2>Picking out columns of interest using <code>select()</code></h2></hgroup><article  id="picking-out-columns-of-interest-using-select" class="build">
